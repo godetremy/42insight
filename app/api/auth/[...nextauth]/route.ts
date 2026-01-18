@@ -7,6 +7,10 @@ export const authOptions: NextAuthOptions = {
     FortyTwoProvider({
       clientId: process.env.CLIENT_ID1!,
       clientSecret: process.env.CLIENT_SECRET1!,
+      authorization: {
+        url: "https://api.intra.42.fr/oauth/authorize",
+        params: { scope: "public projects" },
+      },
       httpOptions: {
         timeout: 10000,
       },
