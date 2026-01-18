@@ -88,3 +88,11 @@ export interface FortyTwoStore {
   toggleProfessionalExperience: (experience: string) => void;
   setProfessionalExperienceMark: (experience: string, mark: number) => void;
 }
+
+export interface FortyTwoCorrectionSlot {
+    id: number,
+    begin_at: string,
+    end_at: string,
+    scale_team: null, // Can it be visible ??
+    user: string,
+}
