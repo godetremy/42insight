@@ -1,9 +1,9 @@
 "use client";
 import {useEffect, useState} from "react";
 import {useFortyTwoStore} from "@/providers/forty-two-store-provider";
-import {FortyTwoCorrectionSlot} from "@/types/forty-two";
+import {FortyTwoCorrectionSlot, FortyTwoProject} from "@/types/forty-two";
 import {useCampus} from "@/contexts/CampusContext";
-import {ChevronLeft, ChevronRight} from "lucide-react";
+import {ChevronDown, ChevronLeft, ChevronRight} from "lucide-react";
 import {Spinner} from "@/components/ui/spinner";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import * as React from "react";
@@ -110,10 +110,83 @@ const TableDays = (props: { slots: FortyTwoCorrectionSlot[], index: number, dayS
                         <p>{`From ${convertDate(slot.begin_at)} to ${convertDate(slot.end_at)}`}</p>
                     </TooltipContent>
                 </Tooltip>
-
             ))}
         </div>
     )
+}
+
+const ProjectSelector = (props: {
+    onSelect: (selection: string) => void,
+    selectedProjectId: string | null,
+    projects: FortyTwoProject[]
+}) => {
+
+    const [open, setOpen] = React.useState(false);
+    const [searchTerm, setSearchTerm] = React.useState("");
+
+    /*
+    <select
+                onChange={(event) => props.onSelect(event.target.value)}
+            >
+                {props.projects.map((project) => (
+                    <option key={project.id} value={project.id}>{project.name}</option>
+                ))}
+            </select>
+     */
+
+    const getSelectedProjects = () => {
+        return props.projects.find((project) => project.id.toString() === props.selectedProjectId);
+    }
+
+    return (
+        <>
+            <button
+                className="h-10 bg-sidebar border-1 rounded-xl w-80 flex justify-between items-center overflow-hidden p-3 hover:bg-muted"
+                onClick={() => setOpen(!open)}
+            >
+                <p>
+                    {getSelectedProjects()?.name ?? "Unknown project"}
+                </p>
+                <ChevronDown/>
+            </button>
+            {open && (
+                <div
+                    className="h-90 bg-sidebar border-1 rounded-xl w-80 flex overflow-hidden absolute z-20 translate-y-10 shadow-lg opacity-0 duration-300 flex-col"
+                    ref={(el) => {
+                        if (el) {
+                            requestAnimationFrame(() => {
+                                el.classList.remove("opacity-0", "translate-y-10");
+                                el.classList.add("opacity-100", "translate-y-12");
+                            });
+                        }
+                    }}
+                >
+                    <div className={"h-12 p-3 bg-gradient-to-b from-background via-background/70 to-transparent absolute w-full"}>
+                        <input
+                            placeholder="Search for a project"
+                            className={"bg-muted/80 p-4 rounded-full h-10 w-full backdrop-blur-xs border-1 outline-0"}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <div className={"flex flex-col h-full overflow-scroll p-3 pt-16"}>
+                        {props.projects.filter((item) => (item.name.toLowerCase().includes(searchTerm.toLowerCase()))).map((project) => (
+                            <button
+                                key={project.id}
+                                onClick={() => {
+                                    setOpen(false);
+                                    setSearchTerm("");
+                                    props.onSelect(project.id.toString())
+                                }}
+                                className={"hover:bg-muted rounded-md text-left px-3 py-2 duration-100"}
+                            >
+                                {project.name}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </>
+    );
 }
 
 const startOfISOWeekUTC = (date: Date) => {
@@ -128,7 +201,9 @@ export default function Slots() {
     const campus = useCampus();
 
     const projects = useFortyTwoStore(state => {
-        return Object.values(state.projects);
+        return Object.values(state.projects).filter((project) => {
+            return !project.exam
+        });
     });
 
     const [week, setWeek] = useState<Date>(startOfISOWeekUTC(new Date()));
@@ -150,6 +225,10 @@ export default function Slots() {
                 const formated_to = `${to_date.getFullYear()}-${(to_date.getMonth() + 1).toString().padStart(2, '0')}-${(to_date.getDate()).toString().padStart(2, '0')}T23:59:59.000Z`;
 
                 const f = await fetch(`/api/slots/${campus.userCampus}/${selectedProject}?from=${formated_from}&to=${formated_to}`);
+
+                if (!f.ok)
+                    throw new Error("Unable to fetch slots");
+
                 const j = await f.json();
 
                 setSlots(j);
@@ -206,15 +285,14 @@ export default function Slots() {
     return (
         <div className="container mx-auto p-6 space-y-6 flex flex-col flex-1" style={{maxHeight: "calc(100vh - 48px)"}}>
             <div className={"flex justify-between"}>
-                <select onChange={(event) => {
-                    setSelectedProject(event.target.value)
-                }}>
-                    {projects.map((project) => (
-                        <option key={project.id} value={project.id}>{project.name}</option>
-                    ))}
-                </select>
+                <ProjectSelector
+                    onSelect={setSelectedProject}
+                    projects={projects}
+                    selectedProjectId={selectedProject}
+                />
                 <div
-                    className="h-10 bg-sidebar border-1 rounded-xl w-50 flex justify-between items-center overflow-hidden">
+                    className="h-10 bg-sidebar border-1 rounded-xl w-50 flex justify-between items-center overflow-hidden"
+                >
                     <button
                         className="aspect-square h-full border-r-1 flex items-center justify-center hover:bg-muted"
                         onClick={() => addDaysToWeek(-7)}
