@@ -98,7 +98,7 @@ function SidebarContent({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </div>
-        <div className="flex-1">
+        <div className="flex-1 flex">
           <CommandMenu />
           <CampusInfoDialog open={showCampusInfo} onOpenChange={setShowCampusInfo} />
           {children}

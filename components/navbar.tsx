@@ -18,10 +18,8 @@ import {
   UserRoundSearch,
   Map,
   LayoutGrid,
-  BookUser,
-  Workflow,
-  GamepadIcon,
   Award,
+  Eye,
 } from "lucide-react";
 
 import {
@@ -154,6 +152,12 @@ const navigationData = {
           icon: Calendar,
           description: "Upcoming events and schedules",
         },
+        {
+          title: "Correction slots",
+          url: "/slots",
+          icon: Eye,
+          description: "See correction slots for a project",
+        },
       ],
     },
     {
@@ -222,7 +226,7 @@ const bottomLinks = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const { setTheme } = useTheme();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const user = session?.user;
   const { open } = useSidebar();
   const { selectedCampus } = useCampus();
