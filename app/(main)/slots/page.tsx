@@ -76,7 +76,7 @@ const TableDays = (props: { slots: FortyTwoCorrectionSlot[], index: number, dayS
                 </div>
             ))}
             {props.slots.map((slot, i) => (
-                <Tooltip>
+                <Tooltip key={i}>
                     <TooltipTrigger asChild>
                         <div
                             className="h-50 bg-accent absolute left-0 right-0 p-2 border-1 border-l-0 overflow-hidden"
@@ -86,7 +86,6 @@ const TableDays = (props: { slots: FortyTwoCorrectionSlot[], index: number, dayS
                                 padding: getHeight(slot) > 40 ? "8px 8px":"0px 8px",
                                 alignItems: getHeight(slot) > 40 ? undefined:'center',
                             }}
-                            key={i}
                         >
                             <p
                                 className="text-primary"
