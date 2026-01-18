@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { apiRateLimiter } from "@/lib/api-rate-limiter";
+import {campusMapping} from "@/app/const/CampusMapping";
 
 export async function GET(
   request: Request,
@@ -18,11 +19,6 @@ export async function GET(
 
   try {
     const { campus_name } = await params
-    
-    const campusMapping: { [key: string]: number } = {
-      Angouleme: 31,
-      Nice: 41,
-    };
 
     const campusId = campusMapping[campus_name];
     if (!campusId) {
